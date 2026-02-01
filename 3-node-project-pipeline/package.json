@@ -1,0 +1,15 @@
+{
+  "name": "node-calculator-app",
+  "version": "1.0.0",
+  "description": "Simple Node.js calculator application with Jenkins pipeline automation",
+  "main": "app.js",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node app.js",
+    "test": "node test/test.js"
+  },
+  "keywords": ["calculator", "nodejs", "jenkins", "automation"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}

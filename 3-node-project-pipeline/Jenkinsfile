@@ -1,0 +1,115 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_IMAGE = "node-project-pipeline:latest"
+        DOCKER_CONTAINER = "node-project-pipeline:latest"
+        DOCKER_REGISTRY = "docker.io"
+        DOCKER_USERNAME = "tanveersingg"
+        DOCKER_REGISTRY_IMAGE = "${DOCKER_USERNAME}/node-project-pipeline:latest"
+    }
+    
+    stages {
+        stage('Clone Repository') {
+            steps {
+                echo "========== CLONING REPOSITORY =========="
+                // For testing locally, we'll use the workspace
+                echo "Repository cloned successfully"
+                sh 'pwd && ls -la'
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                echo "========== INSTALLING DEPENDENCIES =========="
+                sh 'npm install'
+                echo "Dependencies installed successfully"
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo "========== BUILDING PROJECT =========="
+                sh 'npm run build'
+                echo "Build completed successfully"
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo "========== RUNNING TESTS =========="
+                sh 'npm test'
+                echo "Tests completed successfully"
+            }
+        }
+        
+        stage('Start Application') {
+            steps {
+                echo "========== STARTING APPLICATION =========="
+                sh 'npm start'
+                echo "Application started successfully"
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                echo "========== BUILDING DOCKER IMAGE =========="
+                sh 'docker build -t ${DOCKER_IMAGE} .'
+                echo "Docker image built: ${DOCKER_IMAGE}"
+            }
+        }
+        
+        stage('Run Docker Container') {
+            steps {
+                echo "========== RUNNING DOCKER CONTAINER =========="
+                sh 'docker run --rm --name ${DOCKER_CONTAINER} ${DOCKER_IMAGE}'
+                echo "Docker container executed successfully"
+            }
+        }
+        
+        stage('Docker Image Tag') {
+            steps {
+                echo "========== TAGGING DOCKER IMAGE =========="
+                sh 'docker tag ${DOCKER_IMAGE} ${DOCKER_REGISTRY_IMAGE}'
+                echo "Docker image tagged: ${DOCKER_REGISTRY_IMAGE}"
+            }
+        }
+        
+        stage('Docker Login') {
+            steps {
+                echo "========== LOGGING INTO DOCKER REGISTRY =========="
+                sh 'docker login -u ${DOCKER_USER} -p docker_password'
+                echo "Docker login successful"
+                
+            }
+        }
+        
+        stage('Docker Image Push') {
+            steps {
+                echo "========== PUSHING DOCKER IMAGE TO DOCKER HUB =========="
+                sh 'docker push ${DOCKER_REGISTRY_IMAGE}'
+                echo "Docker image pushed successfully: ${DOCKER_REGISTRY_IMAGE}"
+            }
+        }
+        
+        stage('Clean Work Space') {
+            steps {
+                echo "========== CLEANING WORKSPACE =========="
+                cleanWs()
+                echo "Workspace cleaned successfully"
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo "========== PIPELINE COMPLETED =========="
+        }
+        success {
+            echo "✓ PIPELINE EXECUTION SUCCESSFUL"
+        }
+        failure {
+            echo "✗ PIPELINE EXECUTION FAILED"
+        }
+    }
+}
